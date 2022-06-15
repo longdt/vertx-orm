@@ -11,6 +11,10 @@
 
     <artifactId>vertx-orm-commons</artifactId>
 
+    <name>Vertx ORM Commons</name>
+    <description>A simple library which provide POJO mapping Table utilities</description>
+    <url>https://github.com/longdt/vertx-orm/vertx-orm-commons</url>
+
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
