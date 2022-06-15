@@ -316,8 +316,8 @@ public abstract class AbstractCrudRepository<ID, E> implements CrudRepository<ID
     private Future<E> upsert(SqlConnection conn, E entity) {
         var params = parametersMapper.apply(entity);
         var upsertParams = new Object[(params.length << 1) - 1];
-        System.arraycopy(params, 1, upsertParams, 0, params.length - 1);
-        System.arraycopy(params, 0, upsertParams, params.length - 1, params.length);
+        System.arraycopy(params, 0, upsertParams, 0, params.length);
+        System.arraycopy(params, 1, upsertParams, params.length, params.length - 1);
         return conn.preparedQuery(sqlSupport.getUpsertSql())
                 .execute(Tuple.wrap(upsertParams))
                 .map(entity);

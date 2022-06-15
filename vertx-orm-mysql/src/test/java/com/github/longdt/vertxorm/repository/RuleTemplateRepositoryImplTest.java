@@ -4,6 +4,7 @@ import com.github.longdt.vertxorm.model.ArgumentDescription;
 import com.github.longdt.vertxorm.model.RuleTemplate;
 import com.github.longdt.vertxorm.repository.mysql.query.QueryFactory;
 import com.github.longdt.vertxorm.util.DatabaseTestCase;
+import com.github.longdt.vertxorm.util.Futures;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,35 @@ class RuleTemplateRepositoryImplTest extends DatabaseTestCase {
                     assertEquals(entity.getId(), 1);
                     assertEquals(entity.getFlinkJob(), template.getFlinkJob());
                     assertTrue(entity.getActive());
+                    testContext.completeNow();
+                })));
+    }
+
+    @Test
+    void save(Vertx vertx, VertxTestContext testContext) {
+        var arguements = new HashMap<String, ArgumentDescription>();
+        arguements.put("max_txn_cnt", new ArgumentDescription().setName("max_txn_cnt").setType(ArgumentDescription.ValueType.INTEGER));
+        arguements.put("max_txn_amount", new ArgumentDescription().setName("max_txn_amount").setType(ArgumentDescription.ValueType.INTEGER));
+        var now = LocalDateTime.now();
+        var template = new RuleTemplate()
+                .setActive(true)
+                .setName(DEFAULT_RULE_TEMPLATE_NAME)
+                .setFlinkJob("Flink Job")
+                .setArguments(arguements)
+                .setCreatedAt(now)
+                .setUpdatedAt(now);
+        template = Futures.join(repository.insert(template));
+        assertTrue(template.getActive());
+        assertEquals("Flink Job", template.getFlinkJob());
+
+        template.setActive(false)
+                .setFlinkJob("Some Job");
+        repository.save(template)
+                .onComplete(testContext.succeeding(entity -> testContext.verify(() -> {
+                    assertNotNull(entity);
+                    assertEquals(entity.getId(), 1);
+                    assertEquals(entity.getFlinkJob(), "Some Job");
+                    assertFalse(entity.getActive());
                     testContext.completeNow();
                 })));
     }
